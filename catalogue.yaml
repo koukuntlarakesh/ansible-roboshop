@@ -36,7 +36,7 @@
       dest: /tmp
       remote_src: yes # this says that no need find file in controller file is already present in target machine
   
-  - name: installing dependencies
+  - name: install dependencies
     ansible.builtin.command: npm install
     args:
       chdir: /app
