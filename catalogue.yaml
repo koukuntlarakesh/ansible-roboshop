@@ -64,6 +64,12 @@
     ansible.builtin.command:  mongo --host mongod.koukuntla.online --quiet --eval 'db = db.getSiblingDB("catalogue"); db.products.count()'
     register: product_count
 
-  - name: print product
-    ansible.builtin.debug:
-      msg: "products count :{{products_count}}"
+  - name: load catalogue data
+    ansible.builtin.command: mongo --host MONGODB-SERVER-IPADDRESS < /app/schema/catalogue.js
+    when: product_count.stdout == "0"
+
+  - name: start and enable catalogue
+    ansible.builtin.service
+      name: catalogue
+      state: started
+      enabled: yes
