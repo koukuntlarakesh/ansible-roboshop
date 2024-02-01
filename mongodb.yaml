@@ -1,5 +1,5 @@
 - name: mongodb
-  hosts: localhosts
+  hosts: mongodb.koukuntla.online
   become: yes
   tasks: 
   - name: copying data from the repo 
