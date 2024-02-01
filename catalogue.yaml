@@ -1,0 +1,13 @@
+- name: catalogue
+  hosts: catalogue
+  become: yes
+  tasks: 
+  - name: include the main play
+    ansible.builtin.command: dnf module disable nodejs -y ; dnf module enable nodejs:18 -y
+
+
+  - name: install nodesjs
+    ansible.builtin.package:
+      name: nodejs
+      state: present
+
