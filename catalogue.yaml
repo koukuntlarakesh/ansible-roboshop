@@ -10,6 +10,60 @@
     ansible.builtin.package:
       name: nodejs
       state: present
+  
+  - name: creating the user
+    ansible.builtin.user:
+      name: roboshop
+  
+  - name: recursively remove app directory
+    ansible.builtin.file:
+      path: /app
+      state: absent
+  
+  - name: creating app directory
+    ansible.builtin.file:
+      path: /app
+      directory: yes
 
-   
+  - name: downloading catalogue application
+    ansible.builtin.get_url:
+      url: https://roboshop-builds.s3.amazonaws.com/catalogue.zip
+      dest: /tmp
+  
+  - name: Extracting catalogue application
+    ansible.builtin.unarchive:
+      src: /tmp/catalogue.zip
+      dest: /tmp
+      remote_src: yes # this says that no need find file in controller file is already present in target machine
+  
+  - name: installing dependencies
+    ansible.builtin.command: npm install
+    args:
+      chdir: /app
+    
+  - name: copying data from the service 
+    ansible.builtin.copy:
+      src: catalogue.service
+      dest: /etc/systemd/system/catalogue.service
+  
+  - name: system daemon_reload
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+        
+  - name: copying data from the repo 
+    ansible.builtin.copy:
+      src: mongo.repo
+      dest: /etc/yum.repos.d/mongo.repo
+  
+  - name: installing mongodb-org 
+    ansible.builtin.package:
+      name: mongodb-org-shell
+      state: present
+    
+  - name: get the categories count
+    ansible.builtin.command:  mongo --host mongod.koukuntla.online --quiet --eval ' db = db.getSiblingDB("catalogue"); db.products.count()'
+      register: products_count
 
+  - name: print product
+    ansible.builtin.debug:
+      msg: "products count :{{products_count}}"
