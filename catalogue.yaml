@@ -60,10 +60,10 @@
       name: mongodb-org-shell
       state: present
     
-  - name: get the categories count
-    ansible.builtin.command:  mongo --host mongod.koukuntla.online --quiet --eval 'db = db.getSiblingDB("catalogue"); db.products.count()'
-      register: products_count
+#  - name: get the categories count
+ #   ansible.builtin.command:  mongo --host mongod.koukuntla.online --quiet --eval 'db = db.getSiblingDB("catalogue"); db.products.count()'
+     # register: products_count
 
-  - name: print product
-    ansible.builtin.debug:
-      msg: "products count :{{products_count}}"
+  #- name: print product
+   # ansible.builtin.debug:
+    #  msg: "products count :{{products_count}}"
