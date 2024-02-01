@@ -1,75 +1,80 @@
 - name: catalogue
   hosts: catalogue
   become: yes
-  tasks: 
-  - name: enabling and disabling the nodejs
+  tasks:
+  - name: disable old nodejs and enable nodejs
     ansible.builtin.shell: dnf module disable nodejs -y ; dnf module enable nodejs:18 -y
 
-
-  - name: install nodesjs
-    ansible.builtin.package:
-      name: nodejs
+  - name: Install nodejs
+    ansible.builtin.dnf:
+      name: nodejs 
       state: present
-  
-  - name: creating the user
+
+  - name: create roboshop user
     ansible.builtin.user:
       name: roboshop
-  
-  - name: recursively remove app directory
+
+  - name: Recursively remove app directory
     ansible.builtin.file:
       path: /app
       state: absent
-  
+
   - name: create app directory
     ansible.builtin.file:
       path: /app
       state: directory
 
-  - name: downloading catalogue application
+  - name: download catalogue application
     ansible.builtin.get_url:
       url: https://roboshop-builds.s3.amazonaws.com/catalogue.zip
       dest: /tmp
-  
-  - name: Extracting catalogue application
+
+  - name: extract catalogue application
     ansible.builtin.unarchive:
       src: /tmp/catalogue.zip
       dest: /app
-      remote_src: yes # this says that no need find file in controller file is already present in target machine
-  
+      remote_src: yes
+
   - name: Install dependencies
     ansible.builtin.command: npm install
     args:
       chdir: /app
-    
-  - name: copying data from the service 
+
+  - name: Copy catalogue service
     ansible.builtin.copy:
       src: catalogue.service
       dest: /etc/systemd/system/catalogue.service
-  
-  - name: system daemon_reload
+
+  - name: deamon realod and start
     ansible.builtin.systemd_service:
       daemon_reload: true
-        
-  - name: copying data from the repo 
+
+  # let's start after the data is loaded
+
+  - name: Copy mongodb repo
     ansible.builtin.copy:
-      src: mongo.repo
-      dest: /etc/yum.repos.d/mongo.repo
-  
-  - name: installing mongodb-org 
+      src: mongodb.repo
+      dest: /etc/yum.repos.d/mongodb.repo
+
+  - name: Install mongodb client
     ansible.builtin.package:
       name: mongodb-org-shell
       state: present
-    
+
   - name: get the categories count
-    ansible.builtin.command:  mongo --host mongod.koukuntla.online --quiet --eval 'db = db.getSiblingDB("catalogue"); db.products.count()'
+    ansible.builtin.command:  mongo --host mongodb.daws76s.online --quiet --eval 'db = db.getSiblingDB("catalogue"); db.products.count()'
     register: product_count
 
+  # - name: print the count
+  #   ansible.builtin.debug:
+  #     msg: "product count: {{product_count}}"
+
   - name: load catalogue data
-    ansible.builtin.command: mongo --host mongod.koukuntla.online < /app/schema/catalogue.js
-    when: product_count.stdout == "0"
+    ansible.builtin.command: mongo --host mongodb.daws76s.online < /app/schema/catalogue.js
+    when: product_count.stdout == "0" # keep double quotes
 
   - name: start and enable catalogue
     ansible.builtin.service:
       name: catalogue
-      state: started
+      state: restarted
       enabled: yes
