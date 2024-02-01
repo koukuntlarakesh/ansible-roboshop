@@ -33,7 +33,7 @@
   - name: Extracting catalogue application
     ansible.builtin.unarchive:
       src: /tmp/catalogue.zip
-      dest: /tmp
+      dest: /app
       remote_src: yes # this says that no need find file in controller file is already present in target machine
   
   - name: Install dependencies
