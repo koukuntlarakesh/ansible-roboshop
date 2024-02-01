@@ -13,3 +13,24 @@
       state: started
       enabled: yes
     
+  - name: remove html content
+    ansible.builtin.file:
+      path: /usr/share/nginx/html
+      state: absent
+
+  - name: downloading the html content
+    ansible.builtin.url:
+      url: https://roboshop-builds.s3.amazonaws.com/web.zip
+      dest: /tmp
+
+  - name: Extract application
+    ansible.builtin.unarchive:
+      src: /tmp/web.zip
+      dest: /usr/share/nginx/html
+      remote_src: yes
+      
+  name: start and enable nginx
+    ansible.builtin.service:
+      name: nginx
+      state: started
+      
