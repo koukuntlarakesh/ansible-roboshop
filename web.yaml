@@ -1,4 +1,4 @@
-- name: web
+- name: Install web component
   hosts: web
   become: yes
   tasks: 
