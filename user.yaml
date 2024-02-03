@@ -62,6 +62,15 @@
       name: mongodb-org-shell 
       state: present
 
+  - name: get user count
+    ansible.builtin.command: mongo --host mongod.koukuntla.online --quiet --eval 'db = db.getSiblingDB("catalogue"); db.user.count()'
+    register: user_count
+
+  - name: load user data 
+    ansible.builtin.command: mongo --host mongod.koukuntla.online </app/schema/user.js
+    when: user_count.stdout == "0"
+
+    
   - name: Start  service and enable it to start
     ansible.builtin.service:
      name: user
