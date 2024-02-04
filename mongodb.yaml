@@ -1,5 +1,5 @@
 - name: mongodb
-  hosts: mongodb
+  hosts: mongod
   become: yes
   tasks: 
   - name: copying data from the repo 
